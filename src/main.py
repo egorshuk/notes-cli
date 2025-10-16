@@ -4,13 +4,19 @@ FILE = "notes.json"
 
 def load():
     if not os.path.exists(FILE): return []
-    with open(FILE) as f: return json.load(f)
+    try:
+        with open(FILE) as f: return json.load(f)
+    except json.JSONDecodeError:
+        print("corrupted notes file — resetting.")
+        return []
 
 def save(notes):
-    with open(FILE, "w") as f: json.dump(notes, f)
+    with open(FILE, "w") as f: json.dump(notes, f, indent=2, ensure_ascii=False)
 
 def add(note):
-    data = load(); data.append(note); save(data)
+    data = load()
+    data.append(note)
+    save(data)
 
 def list_notes():
     if args.bullet: 
@@ -21,7 +27,10 @@ def list_notes():
         for note in load(): print(note)
 
 def remove(i):
-    data = load(); data.pop(i-1); save(data)
+    data = load()
+    if 1 <= i <= len(data):
+        data.pop(i-1)
+        save(data)
 
 
 parser = argparse.ArgumentParser(
@@ -32,13 +41,13 @@ sub = parser.add_subparsers(dest = "cmd")
 
 addp = sub.add_parser(
     "add",
-    help = "used when you want to write a note"
+    help = "add new note"
 )
 addp.add_argument("text", type=str)
 
 remp = sub.add_parser(
     "remove",
-    help = "used when you want to delete a note"
+    help = "delete note by index"
 )
 remp.add_argument("index", type=int)
 
@@ -52,8 +61,8 @@ list_style = listp.add_mutually_exclusive_group()
 list_style.add_argument(
     '-b',                                       # короткий флаг
     '--bullet',                                 # полный флаг 
-    nargs = "?",
-    const = "-",
+    nargs = "?",                                # 0 или 1 аргумента на вход
+    const = "-",                                # стандартный bullet
     help = 'prints notes as bullet list'        # описание
 )
 
