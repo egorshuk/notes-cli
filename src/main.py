@@ -1,4 +1,5 @@
-import argparse, os, json
+import argparse, os, json 
+from storage import log_action
 
 FILE = "notes.json"
 
@@ -76,6 +77,11 @@ list_style.add_argument(
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    if args.cmd == "add": add(args.text)
-    elif args.cmd == "remove": remove(args.index)
-    elif args.cmd == "list": list_notes()
+    if args.cmd == "add": 
+        add(args.text)
+        log_action(f"add note \"{args.text}\"")
+    elif args.cmd == "remove": 
+        remove(args.index)
+        log_action(f"remove note {args.index}")
+    elif args.cmd == "list": 
+        list_notes()
